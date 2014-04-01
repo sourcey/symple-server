@@ -1,0 +1,24 @@
+{
+  /* The ID of the node instance */
+  "nodeId" : 1,
+  
+  /* The port to listen on */
+  "port" : 4000,  
+  
+  /* Allow anonymous connections */
+  "anonymous" : false,  
+    
+  /* Redis configuration */
+  "redis" : {
+    "host" : "127.0.0.1",
+    "port" : 6379,
+    "password" : ""
+  },
+  
+  /* SSL configuration */
+  "ssl" : {
+    "enabled" : false,
+    "key" : "/path/to/.key",
+    "cert" : "/path/to/.crt"
+  }
+}
