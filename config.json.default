@@ -3,19 +3,19 @@
   "nodeId" : 1,
   
   /* The port to listen on */
-  "port" : 4000,  
+  "port" : 4500,  
   
   /* Allow anonymous connections */
   "anonymous" : false,  
     
-  /* Redis configuration */
+  /* Redis configuration (required if anonymous == false) */
   "redis" : {
     "host" : "127.0.0.1",
     "port" : 6379,
     "password" : ""
   },
   
-  /* SSL configuration */
+  /* SSL configuration (required if using HTTPS) */
   "ssl" : {
     "enabled" : false,
     "key" : "/path/to/.key",
