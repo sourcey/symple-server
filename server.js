@@ -38,7 +38,7 @@ io.configure(function () {
   if (config.redis) {
   
     // Initialize the redis store
-    var store = new RedisStore({
+    var store = new sio.RedisStore({
       nodeID: config.nodeId     || 1,
       redisPub: config.redis    || {},
       redisSub: config.redis    || {},
