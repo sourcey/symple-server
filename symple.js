@@ -17,8 +17,8 @@ module.exports = Symple;
 /**
  * Symple server class.
  *
- * TODO: fix touch redis session
  * TODO: verify loaded session data
+ * TODO: fix password based redis session
  *
  * @param {Object} optional, config
  * @api public
@@ -62,16 +62,6 @@ Symple.prototype.init = function() {
 
   // Setup redis if required
   if (this.config.redis) {
-    // var redis = require('redis').createClient;
-    // var adapter = require('socket.io-redis');
-    // var pub = redis(port, host, { auth_pass: "pwd" });
-    // var sub = redis(port, host, { return_buffers: true, auth_pass: "pwd" });
-    // io.adapter(adapter({ pubClient: pub, subClient: sub }));
-
-    // var io = require('socket.io')(3000);
-    // var redis = require('socket.io-redis');
-    // this.io.adapter(redis(this.config.redis));
-
     var redis = require('redis').createClient;
     var adapter = require('socket.io-redis');
     this.pub = redis(this.config.redis.port, this.config.redis.host); //, { auth_pass: "pwd" }
@@ -134,7 +124,7 @@ Symple.prototype.onConnection = function(socket) {
       if (self.config.redis) {
         // TODO: use glocal timer
         interval = setInterval(function () {
-          self.touchSession(session.user, session.token, function(err, res) {
+          self.touchSession(session.token, function(err, res) {
             console.log(socket.id, 'touching session:', !!res);
           });
         }, 10 * 60000);
@@ -170,7 +160,7 @@ Symple.prototype.authorize = function(socket, req, fn) {
 
     // Retreive the session from Redis
     console.log(socket.id, 'authenticating', req);
-    self.getSession(req.user, req.token, function(err, data) {
+    self.getSession(req.token, function(err, data) {
       if (err) { // || typeof session.user !== 'object'
         console.log(socket.id, 'authentication failed: no session');
         return fn(401, 'Authentication failed');
@@ -257,14 +247,12 @@ Symple.prototype.toPeer = function(socket, p) {
   return p;
 }
 
-
 Symple.prototype.toAddress = function(socket) {
   return socket.session.user + "@" + socket.session.group + "/" + socket.id;
 }
 
-Symple.prototype.getSession = function(user, token, fn) {
-  this.pub.get('symple:' + user + ':' + token, function(err, reply) {
-    console.log("reply", reply)
+Symple.prototype.getSession = function(token, fn) {
+  this.pub.get('symple:session:' + token, function(err, reply) {
     if (reply) {
       fn(err, JSON.parse(reply));
     }
@@ -272,8 +260,8 @@ Symple.prototype.getSession = function(user, token, fn) {
   });
 }
 
-Symple.prototype.touchSession = function(user, token, fn) {
-  this.pub.expireat("symple:*:" + token, 15 * 60, fn);
+Symple.prototype.touchSession = function(token, fn) {
+  this.pub.expireat("symple:session:" + token, 15 * 60, fn);
 }
 
 Symple.prototype.getDestinationAddress = function(socket, message) {
@@ -281,7 +269,7 @@ Symple.prototype.getDestinationAddress = function(socket, message) {
     case 'object':
       return message.to;
     case 'string':
-      return this.parseAddress(socket, message.to);
+      return this.parseAddress(message.to);
     case 'undefined':
       return { group: socket.session.group };
   }
@@ -293,7 +281,7 @@ Symple.prototype.broadcast = function(socket, message) {
     return;
   }
 
-  // Replace from address with server-side peer data for security.
+  // Replace from address with server-side session data for security.
   // message.from.id = socket.session.id;
   // message.from.type = socket.session.type;
   // message.from.group = socket.session.group;
@@ -310,20 +298,23 @@ Symple.prototype.broadcast = function(socket, message) {
     return;
   }
 
-  // If a session id was given we send a directed message to that session id.
+  // If a session id was given then send a directed message to that session id.
   if (typeof to.id === 'string' && to.id.length) {
-    socket.namespace/*.except(this.unauthorizedIDs())*/.socket(to.id).json.send(message);
+    //socket.namespace/*.except(this.unauthorizedIDs())*/.socket(to.id).json.send(message);
+    this.io.to(to.id).emit('message', message);
   }
 
-  // If a user was given (but no session id) we broadcast a message to user scope.
-  // TODO: Ensure group membership
+  // If a user was given (but no session id) then broadcast the message to user scope.
+  // TODO: Ensure sender and receiver belong to the same group?
   else if (to.user && typeof to.user === 'string') {
-    socket.broadcast.to('user-' + to.user/*, this.unauthorizedIDs()*/).json.send(message);
+    //socket.broadcast.to('user-' + to.user/*, this.unauthorizedIDs()*/).json.send(message);
+    this.io.to('user-' + to.user).emit('message', message);
   }
 
-  // If a group was given (but no session id or user) we broadcast to group scope.
+  // If a group was given (but no session id or user) then broadcast to the group scope.
   else if (to.group && typeof to.group === 'string') {
-    socket.broadcast.to('group-' + to.group/*, this.unauthorizedIDs()*/).json.send(message);
+    //socket.broadcast.to('group-' + to.group/*, this.unauthorizedIDs()*/).json.send(message);
+    this.io.to('group-' + to.group).emit('message', message);
   }
 
   else {
@@ -372,7 +363,6 @@ Symple.prototype.parseAddress = function(str) {
 
   return addr;
 }
-
 
 Symple.prototype.buildAddress = function(peer) {
   return peer.user + "@" + peer.group + "/" + peer.id;

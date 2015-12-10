@@ -6,7 +6,7 @@
   "port" : 4500,   /* 443 */
 
   /* Allow anonymous connections */
-  "anonymous" : false,
+  "anonymous" : true,
 
   /* Redis configuration */
   "redis" : {
