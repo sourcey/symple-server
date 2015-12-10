@@ -17,7 +17,8 @@ module.exports = Symple;
 /**
  * Symple server class.
  *
- * TODO: fix touch session
+ * TODO: fix touch redis session
+ * TODO: verify loaded session data
  *
  * @param {Object} optional, config
  * @api public
@@ -39,15 +40,17 @@ Symple.prototype.loadConfig = function(filepath) {
 Symple.prototype.init = function() {
   var self = this;
 
-  // Create HTTP server instance
-  this.server = (this.config.ssl && this.config.ssl.enabled ?
-    // HTTPS
-    https.createServer({
-        key: fs.readFileSync(this.config.ssl.key)
-      , cert: fs.readFileSync(this.config.ssl.cert)
-    }) :
-    // HTTP
-    http.createServer()).listen(this.config.port);
+  // Create the HTTP server instance if not already set
+  if (!this.server) {
+    this.server = (this.config.ssl && this.config.ssl.enabled ?
+      // HTTPS
+      https.createServer({
+          key: fs.readFileSync(this.config.ssl.key)
+        , cert: fs.readFileSync(this.config.ssl.cert)
+      }) :
+      // HTTP
+      http.createServer()).listen(this.config.port);
+  }
 
   // Bind the Socket.IO server with the HTTP server
   this.io = sio.listen(this.server);
@@ -59,9 +62,21 @@ Symple.prototype.init = function() {
 
   // Setup redis if required
   if (this.config.redis) {
+    // var redis = require('redis').createClient;
+    // var adapter = require('socket.io-redis');
+    // var pub = redis(port, host, { auth_pass: "pwd" });
+    // var sub = redis(port, host, { return_buffers: true, auth_pass: "pwd" });
+    // io.adapter(adapter({ pubClient: pub, subClient: sub }));
+
     // var io = require('socket.io')(3000);
-    var redis = require('socket.io-redis');
-    this.io.adapter(redis(this.config.redis));
+    // var redis = require('socket.io-redis');
+    // this.io.adapter(redis(this.config.redis));
+
+    var redis = require('redis').createClient;
+    var adapter = require('socket.io-redis');
+    this.pub = redis(this.config.redis.port, this.config.redis.host); //, { auth_pass: "pwd" }
+    this.sub = redis(this.config.redis.port, this.config.redis.host, { return_buffers: true }); //, auth_pass: "pwd"
+    this.io.adapter(adapter({ pubClient: this.pub, subClient: this.sub }));
   }
 
   console.log('Symple server listening on port ' + this.config.port);
@@ -75,114 +90,110 @@ Symple.prototype.init = function() {
 
 Symple.prototype.onConnection = function(socket) {
   console.log(socket.id, 'connection');
-  var self = this;
+  var self = this,
+    session = socket.session,
+    interval;
 
-  // 2 seconds to `announce` or get booted
-  var interval = setInterval(function () {
+  // Give the client 2 seconds to `announce` or get booted
+  interval = setInterval(function () {
       console.log(socket.id, 'failed to announce');
       socket.disconnect();
   }, 2000);
 
-  // Announce
+  // Handle the `announce` request
   socket.on('announce', function(req, ack) {
-    console.log(socket.id, 'announcing:', req);
 
-    // try {
+    // Authorize the connection
+    self.authorize(socket, req, function(status, message) {
+      console.log(socket.id, 'announce result:', status);
+      clearInterval(interval);
+      if (status == 200)
+        self.respond(ack, status, message, self.toPeer(socket));
+      else {
+        self.respond(ack, status, message);
+        socket.disconnect();
+        return;
+      }
 
-      // Authorization
-      self.authorize(socket, req, function(status, message) {
-        console.log(socket.id, 'announce result:', status);
-        clearInterval(interval);
-        if (status == 200)
-          self.respond(ack, status, message, self.toPeer(socket));
-        else {
-          self.respond(ack, status, message);
-          socket.disconnect();
-          return;
+      // Message
+      socket.on('message', function(m, ack) {
+        if (m) {
+          if (m.type == 'presence')
+            self.toPresence(socket, m);
+          self.broadcast(socket, m);
+          self.respond(ack, 200, 'Message received');
         }
-
-        // Message
-        socket.on('message', function(m, ack) {
-          if (m) {
-            if (m.type == 'presence')
-              self.toPresence(socket, m);
-            self.broadcastMessage(socket, m);
-            self.respond(ack, 200, 'Message received');
-          }
-        });
-
-        // Peers
-        socket.on('peers', function(ack) {
-          self.respond(ack, 200, '', self.peers(false));
-        });
-
-        // Touch the session event 10 minutes to prevent it from expiring.
-        if (self.config.redis) {
-          interval = setInterval(function () {
-            self.touchSession(function(err, res) {
-              console.log(socket.id, 'touching session:', !!res);
-            });
-          }, 10 * 60000);
-        }
-
       });
-    // }
-    // catch (e) {
-    //   console.log(socket.id, 'internal error: ', e);
-    //   socket.disconnect();
-    // }
+
+      // Peers
+      socket.on('peers', function(ack) {
+        self.respond(ack, 200, '', self.peers(false));
+      });
+
+      // Touch the session 10 minutes to prevent it from expiring.
+      if (self.config.redis) {
+        // TODO: use glocal timer
+        interval = setInterval(function () {
+          self.touchSession(session.user, session.token, function(err, res) {
+            console.log(socket.id, 'touching session:', !!res);
+          });
+        }, 10 * 60000);
+      }
+    });
   });
 
-  //
-  // Disconnection
+  // Handle socket disconnection
   socket.on('disconnect', function() {
     console.log(socket.id, 'is disconnecting');
     clearInterval(interval);
     if (socket.online) {
       socket.online = false;
-      var p = self.toPresence();
-      self.broadcastMessage(p);
+      var p = self.session.toPresence(socket);
+      self.broadcast(p);
     }
-    socket.leave('user-' + socket.user);    // leave user channel
-    socket.leave('group-' + socket.group);  // leave group channel
+    socket.leave('user-' + socket.session.user);    // leave user channel
+    socket.leave('group-' + socket.session.group);  // leave group channel
   });
-// });
 }
 
 
 Symple.prototype.authorize = function(socket, req, fn) {
-  var self = this; //.socket;
+  var self = this;
 
   // Create the session
   socket.session = new Session({ token: req.token });
 
-  // Authenticated Access
+  // Authenticated access
   if (!self.config.anonymous) {
     if (!req.user || !req.token)
       return fn(400, 'Bad request');
 
     // Retreive the session from Redis
-    // socket.token = req.token;                 // Remote session token
-    self.getSession(function(err, session) {
-      //console.log('Authenticating: ', req.token, ':', session);
-      if (err || typeof session !== 'object' || typeof session.user !== 'object') {
-        //console.log('Authentication error: ', req.token, ':', err);
+    console.log(socket.id, 'authenticating', req);
+    self.getSession(req.user, req.token, function(err, data) {
+      if (err) { // || typeof session.user !== 'object'
+        console.log(socket.id, 'authentication failed: no session');
         return fn(401, 'Authentication failed');
       }
-      else { //.user
-        //console.log('Authentication success: ', req);
+      else if (typeof data !== 'object' || !data.user || !data.name || !data.group) {
+        console.log(socket.id, 'authentication failed: invalid session format');
+        return fn(401, 'Invalid session');
+      }
+      else {
+        console.log(socket.id, 'authentication success', data);
         // socket.session = session;             // Remote session object
         // socket.group = session.user.group;    // The client's parent group
         // socket.access = session.user.access;  // The client access level [1 - 10]
         // socket.user = session.user.user;      // The client login name
         // socket.user_id = session.user.user_id;// The client login user ID
+        socket.session.write(data);
         self.onAuthorize(socket, req);
         return fn(200, 'Welcome ' + socket.session.name);
       }
     });
   }
 
-  // Anonymous Access
+  // Anonymous access
   else {
     if (!req.user)
       return fn(400, 'Bad request');
@@ -222,7 +233,6 @@ Symple.prototype.toPresence = function(socket, p) {
   return p;
 }
 
-
 Symple.prototype.toPeer = function(socket, p) {
   if (!p || typeof p !== 'object')
     p = {};
@@ -236,7 +246,7 @@ Symple.prototype.toPeer = function(socket, p) {
   p.online = socket.session.online;
   p.host = socket.handshake.headers['x-real-ip']
     || socket.handshake.headers['x-forwarded-for']
-    || socket.handshake.address.address; //this.handshake ?  : '';
+    || socket.handshake.address; //this.handshake ?  : '';
 
   // allow client to change name
   if (typeof p.name === 'string')
@@ -252,38 +262,19 @@ Symple.prototype.toAddress = function(socket) {
   return socket.session.user + "@" + socket.session.group + "/" + socket.id;
 }
 
-
-Symple.prototype.getSessionKey = function(socket, fn) {
-  // token must be set
-  this.io.store.cmd.keys("symple:*:" + socket.session.token, function(err, keys) {
-    fn(err, keys.length ? keys[0] : null)
-  });
-}
-
-
-Symple.prototype.getSession = function(socket, fn) {
-  var self = this;
-  this.getSessionKey(socket, function(err, key) {
-    if (key) {
-      self.io.store.cmd.get(key, function(err, session) {
-        fn(err, JSON.parse(session));
-      });
+Symple.prototype.getSession = function(user, token, fn) {
+  this.pub.get('symple:' + user + ':' + token, function(err, reply) {
+    console.log("reply", reply)
+    if (reply) {
+      fn(err, JSON.parse(reply));
     }
     else fn("No session", null);
   });
 }
 
-Symple.prototype.touchSession = function(socket, fn) {
-  var self = this;
-  this.getSessionKey(socket, function(err, key) {
-    if (key) {
-      // expire in 15 mins
-      self.io.store.cmd.expire(key, 15 * 60, fn);
-    }
-    else fn("No session", null);
-  });
+Symple.prototype.touchSession = function(user, token, fn) {
+  this.pub.expireat("symple:*:" + token, 15 * 60, fn);
 }
-
 
 Symple.prototype.getDestinationAddress = function(socket, message) {
   switch(typeof message.to) {
@@ -296,27 +287,26 @@ Symple.prototype.getDestinationAddress = function(socket, message) {
   }
 }
 
-
-Symple.prototype.broadcastMessage = function(socket, message) {
+Symple.prototype.broadcast = function(socket, message) {
   if (!message || typeof message !== 'object' || !message.from) {
-    console.error(this.id, 'dropping invalid message:', message);
+    console.error(socket.id, 'dropping invalid message:', message);
     return;
   }
 
   // Replace from address with server-side peer data for security.
-  //message.from.id = this.id;
-  //message.from.type = this.type;
-  //message.from.group = this.group;
-  //message.from.access = this.access;
-  //message.from.user = this.user;
-  //message.from.user_id = this.user_id;
+  // message.from.id = socket.session.id;
+  // message.from.type = socket.session.type;
+  // message.from.group = socket.session.group;
+  // message.from.access = socket.session.access;
+  // message.from.user = socket.session.user;
+  // message.from.user_id = socket.session.user_id;
 
   // Get an destination address object for routing
   var to = this.getDestinationAddress(socket, message);
 
   // Make sure we have a valid destination address
   if (typeof to !== 'object' || typeof to.group === 'undefined') {
-    console.error(this.id, 'dropping invalid message without destination:', to, ':', message);
+    console.error(socket.id, 'dropping invalid message without destination:', to, ':', message);
     return;
   }
 
@@ -337,10 +327,9 @@ Symple.prototype.broadcastMessage = function(socket, message) {
   }
 
   else {
-    console.error(this.id, 'cannot route invalid message:', message);
+    console.error(socket.id, 'cannot route invalid message:', message);
   }
 }
-
 
 Symple.prototype.respond = function(ack, status, message, data) {
   if (typeof ack !== 'function')

@@ -6,13 +6,13 @@
   "port" : 4500,   /* 443 */
 
   /* Allow anonymous connections */
-  "anonymous" : true,
+  "anonymous" : false,
 
-  /* Redis configuration
+  /* Redis configuration */
   "redis" : {
     "host" : "localhost",
     "port" : 6379
-  }, */
+  },
 
   /* SSL configuration */
   "ssl" : {
