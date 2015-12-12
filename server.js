@@ -1,17 +1,14 @@
 // Include Symple
-var Symple = require('./symple');
+var symple = require('./symple');
 
-// Create Symple server instance
-var sy = new Symple();
+// Instantiate the Symple server
+var sy = new symple();
+
+// Load a config file
 sy.loadConfig(__dirname + "/config.json");
+
+// Initialize the server
 sy.init();
 
 // Access Socket.IO functions if required
-sy.io.use(function(socket, next) {
-  var handshakeData = socket.request;
-  // make sure the handshake data looks good as before
-  // if error do this:
-    // next(new Error('not authorized');
-  // else just call next
-  next();
-});
+// sy.io.use(function(socket, next) { });

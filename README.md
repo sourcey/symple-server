@@ -1,29 +1,58 @@
 # Symple Node.js Server
 
-The Symple Node.js server is a server-side module which connects clients and routes real-time messages using the Symple protocol. 
+The Symple server is a real time messaging server built on top of `socket.io` and `redis` for creating blazing fast messaging applications such as chat, media streaming, and games that run in the web browser, desktop, and mobile phone.
 
-## What is Symple?
+Symple is a unrestrictive real time messaging and presence protocol that implements the minimum number of features required to build full fledged messaging applications with security, flexibility, performance and scalability in mind. These features include:
 
-Symple is a unrestrictive real-time messaging and presence protocol. 
+* Session sharing (using Redis)
+* User rostering and presence
+* Media streaming (WebRTC)
+* Real-time forms
 
-The protocol itself is semantically similar to XMPP, except that it is much more flexible and economical due to the use of JSON instead of XML for encoding messages. 
+## Installation
 
-Symple currently has client implementations in [JavaScript](https://github.com/sourcey/symple-client), [Ruby](https://github.com/sourcey/symple-client-ruby) and [C++](https://github.com/sourcey/libsourcey/tree/master/src/symple), which make it ideal for a wide range of messaging requirements, such as building real-time games and applications which run in the web browser, desktop, and mobile phone.
+```bash
+npm install symple
+```
 
-## How to use it
+## Usage
 
-1. Clone the `symple-server` repository.
-2. Copy `config.json.default` to `config.json` and edit as required. See [configuration options](#configuration-options) below.
-3. Fire up the Node.js server `node server`
-4. Check out the `symple-client` or other client repositories to start building your client application.
+To get started straight away fire up the server by typing `node server`
 
-## Configuration options
+The `server.js` file in the root directory of the repo provides a code example of how to include and extend the Symple server:
+
+
+```bash
+// Include Symple
+var symple = require('./symple');
+
+// Instantiate the Symple server
+var sy = new symple();
+
+// Load a config file
+sy.loadConfig(__dirname + "/config.json");
+
+// Initialize the server
+sy.init();
+
+// Access Socket.IO functions if required
+// sy.io.use(function(socket, next) { });
+```
+
+See the [configuration options](#configuration) below for a list of available options.
+
+Once the server is up and running you need a client to connect to it. There are a few options here:
+
+* [JavaScript](https://github.com/sourcey/symple-client)
+* [Ruby](https://github.com/sourcey/symple-client-ruby) 
+* [C++](https://github.com/sourcey/libsourcey/tree/master/src/symple)
+
+## Configuration
+
+The configure the server modify `config.json` as you see fit.
 
 ```
 {
-  /* The ID of the node instance */
-  "nodeId" : 1,
-  
   /* The port to listen on */
   "port" : 4500,  
   
@@ -57,4 +86,4 @@ Symple currently has client implementations in [JavaScript](https://github.com/s
 ## Contact
 
 For more information please check out the Symple homepage: http://sourcey.com/symple/  
-If you have a bug or an issue then please use our new Github issue tracker: https://github.com/sourcey/symple-server-node/issues
+For bug or issues please use our the Github issue tracker: https://github.com/sourcey/symple-server-node/issues

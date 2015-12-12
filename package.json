@@ -1,6 +1,6 @@
 {
   "name": "symple",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Real time chat and presence server",
   "main": "symple.js",
   "dependencies": {
@@ -22,7 +22,7 @@
     "chat",
     "streaming"
   ],
-  "author": "Kam Low <hello@sourcey.com> (http://sourcey.com)",
+  "author": "Kam Low <auscaster@gmail.com> (http://sourcey.com)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sourcey/symple-server-node/issues"
