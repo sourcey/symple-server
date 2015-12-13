@@ -1,5 +1,5 @@
 // Include Symple
-var symple = require('./src/symple');
+var symple = require('./symple');
 
 // Instantiate the Symple server
 var sy = new symple();

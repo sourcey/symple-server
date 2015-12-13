@@ -1,6 +1,6 @@
 {
   "name": "symple",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Real time messaging and presence server",
   "main": "symple.js",
   "dependencies": {
@@ -14,7 +14,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "docs": "jsdoc2md src/*.js  --template README.hbs > README.md"
+    "docs": "jsdoc2md symple.js  --template README.hbs > README.md"
   },
   "repository": {
     "type": "git",
