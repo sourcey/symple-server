@@ -6,7 +6,7 @@ Symple is a unrestrictive real time messaging and presence protocol that impleme
 
 * Session sharing with any backend (via Redis)
 * User rostering and presence
-* Media streaming (via WebRTC, [see demo](symple.sourcey.com))
+* Media streaming (via WebRTC, [see demo](http://symple.sourcey.com))
 * Scoped messaging ie. direct, user and group scope
 * Real-time commands and events
 * Real-time forms
