@@ -5,8 +5,11 @@
   /* The port to listen on */
   "port" : 4500,   /* 443 */
 
-  /* Allow anonymous connections */
-  "anonymous" : true,
+  /* Enable or disable authentication */
+  "authentication" : true,
+
+  /* Session TTL in minutes (default: 15 minutes) */
+  "sessionTTL" : 15,
 
   /* Redis configuration */
   "redis" : {

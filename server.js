@@ -1,5 +1,5 @@
 // Include Symple
-var symple = require('./symple');
+var symple = require('./src/symple');
 
 // Instantiate the Symple server
 var sy = new symple();
@@ -12,3 +12,5 @@ sy.init();
 
 // Access Socket.IO functions if required
 // sy.io.use(function(socket, next) { });
+
+console.log('Symple server listening on port ' + sy.config.port);
