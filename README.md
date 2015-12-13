@@ -63,24 +63,30 @@ The configure the server just modify `config.json` as needed:
 
 ```
 {
+  /* The ID of the node instance */
+  "nodeId" : 1,
+
   /* The port to listen on */
-  "port" : 4500,  
-  
-  /* Allow anonymous connections */
-  "anonymous" : false,  
-    
-  /* Redis configuration (required if anonymous == false) */
+  "port" : 4500,   /* 443 */
+
+  /* Enable or disable authentication */
+  "authentication" : true,
+
+  /* Session TTL in minutes (default: 15 minutes) */
+  "sessionTTL" : 15,
+
+  /* Redis configuration */
   "redis" : {
-    "host" : "127.0.0.1",
+    "host" : "localhost",
     "port" : 6379,
-    "password" : ""
+    password : "redispwd" 
   },
-  
-  /* SSL configuration (required if using HTTPS) */
+
+  /* SSL configuration */
   "ssl" : {
     "enabled" : false,
-    "key" : "/path/to/.key",
-    "cert" : "/path/to/.crt"
+    "key" : "ssl/symple.key",
+    "cert" : "ssl/symple.crt"
   }
 }
 ```
@@ -141,7 +147,7 @@ Shutdown the Symple server.
 **Access:** public  
 <a name="Symple+broadcast"></a>
 ### symple.broadcast(socket, message)
-Create a valid peer object or return null.
+Broadcast a message over the given socket.
 
 **Kind**: instance method of <code>[Symple](#Symple)</code>  
 **Access:** public  

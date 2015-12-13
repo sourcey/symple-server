@@ -324,7 +324,7 @@ Symple.prototype.onAuthorize = function(socket, peer) {
 
 
 /**
- * Create a valid peer object or return null.
+ * Broadcast a message over the given socket.
  *
  * @param {Socket} socket - client socket
  * @param {Object} message - message to send
