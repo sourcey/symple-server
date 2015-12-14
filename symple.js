@@ -160,8 +160,8 @@ Symple.prototype.onConnection = function(socket) {
 
   // Give the client 2 seconds to `announce` or get booted
   timeout = setTimeout(function () {
-      console.log(socket.id, 'failed to announce');
-      socket.disconnect();
+    console.log(socket.id, 'failed to announce');
+    socket.disconnect();
   }, 2000);
 
   // Handle the `announce` request
@@ -243,11 +243,10 @@ Symple.prototype.onDisconnect = function(socket) {
  */
 
 Symple.prototype.authorize = function(socket, req, fn) {
-  var self = this, 
-    peer;
+  var self = this;
 
   // Authenticated access
-  if (!self.config.anonymous) {
+  if (self.config.authentication) {
     if (!req.user || !req.token)
       return fn(400, 'Bad request');
 
@@ -259,6 +258,7 @@ Symple.prototype.authorize = function(socket, req, fn) {
         return fn(401, 'Authentication failed');
       }
       else {
+        console.log(socket.id, 'authentication success');
         socket.token = req.token;
         self.authorizeValidPeer(socket, self.extend(req, session), fn);
       }
@@ -270,7 +270,7 @@ Symple.prototype.authorize = function(socket, req, fn) {
     if (!req.user)
       return fn(400, 'Bad request');
 
-    self.authorizeValidPeer(socket, self.extend(req, session), fn);
+    this.authorizeValidPeer(socket, this.extend(req, session), fn);
   }
 }
 
