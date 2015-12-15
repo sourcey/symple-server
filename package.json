@@ -1,6 +1,6 @@
 {
   "name": "symple",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Realtime messaging and presence server",
   "main": "./lib/symple.js",
   "dependencies": {
@@ -23,10 +23,10 @@
   "keywords": [
     "symple",
     "realtime",
-    "streaming",
-    "webrtc",
     "messaging",
     "websocket",
+    "streaming",
+    "webrtc",
     "chat"
   ],
   "author": "Kam Low <auscaster@gmail.com> (http://sourcey.com)",
