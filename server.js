@@ -1,16 +1,19 @@
-// Include Symple
-var symple = require('./symple');
+// include Symple
+var Symple = require('./lib/symple');
 
-// Instantiate the Symple server
-var sy = new symple();
+// instantiate the Symple server
+var sy = new Symple();
 
-// Load a config file
+// load a config file
 sy.loadConfig(__dirname + "/config.json");
 
-// Initialize the server
+// initialize the server
 sy.init();
 
-// Access Socket.IO functions if required
+// access socket.io instance methods if required
 // sy.io.use(function(socket, next) { });
+
+// access HTTP/S server instance methods if required
+// sy.http.use(function(socket, next) { });
 
 console.log('Symple server listening on port ' + sy.config.port);

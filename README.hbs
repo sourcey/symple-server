@@ -15,6 +15,9 @@ Symple is a unrestrictive real time messaging and presence protocol that impleme
 
 ```bash
 npm install symple
+
+# add the --save flag to automatically add Symple to your package.json dependencies
+# npm install symple --save
 ```
 
 ## Usage
@@ -24,20 +27,19 @@ To get started straight away fire up the default server by typing:
 ```bash
 node server
 
-# or 
+# or
 
 npm start
 ```
 
 The `server.js` file in the root directory of the repo provides a code example of how to include and extend the Symple server:
 
-
 ```bash
 // include Symple
-var symple = require('./symple');
+var Symple = require('symple');
 
 // instantiate the Symple server
-var sy = new symple();
+var sy = new Symple();
 
 // load a config file
 sy.loadConfig(__dirname + "/config.json");
@@ -45,13 +47,18 @@ sy.loadConfig(__dirname + "/config.json");
 // initialize the server
 sy.init();
 
-// access socket.function functions if required
+// access socket.io instance methods if required
 // sy.io.use(function(socket, next) { });
+
+// access HTTP/S server instance methods if required
+// sy.http.use(function(socket, next) { });
+
+console.log('Symple server listening on port ' + sy.config.port);
 ```
 
 See the [configuration options](#configuration) below for a list of available options.
 
-Once the server is up and running you need a client to connect to it. There are a few options in the following languages:
+Once the server is up and running you need a client to connect to it. There are a number of options in the following languages:
 
 * JavaScript: https://github.com/sourcey/symple-client
 * Ruby: https://github.com/sourcey/symple-client-ruby
@@ -59,27 +66,35 @@ Once the server is up and running you need a client to connect to it. There are 
 
 ## Configuration
 
-The configure the server just modify `config.json` as needed:
+To configure the server just modify `config.json` as needed:
 
 ```
 {
-  /* The ID of the node instance */
-  "nodeId" : 1,
+  /*
+    The port to listen on (default: 4500).
+    If `process.env.PORT` is set, the env value will be used instead.
+    Port 443 should always be used for SSL.
+  */
+  "port" : 4500,  /* 443 */
 
-  /* The port to listen on */
-  "port" : 4500,   /* 443 */
+  /*
+    Session time-to-live in minutes (default: 15 minutes)
+    This is the duration of time before sessions expire after the client disconnects.
+    If set to `-1` the session will never expire.
+  */
+  "sessionTTL" : 15,
 
   /* Enable or disable authentication */
   "authentication" : true,
 
-  /* Session TTL in minutes (default: 15 minutes) */
-  "sessionTTL" : 15,
-
-  /* Redis configuration */
+  /*
+    Redis configuration
+    Redis must be available if using `config.authentication = true`
+  */
   "redis" : {
     "host" : "localhost",
     "port" : 6379,
-    password : "redispwd" 
+    "password" : "redispwd"
   },
 
   /* SSL configuration */
@@ -108,5 +123,5 @@ Contributions are always welcome :)
 
 ## Contact
 
-For more information please check out the Symple homepage: http://sourcey.com/symple/  
+For more information check out the Symple homepage: http://sourcey.com/symple/
 For bugs or issues please use the Github issue tracker: https://github.com/sourcey/symple-server-node/issues

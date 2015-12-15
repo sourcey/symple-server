@@ -1,8 +1,8 @@
 {
   "name": "symple",
-  "version": "0.9.5",
-  "description": "Real time messaging and presence server",
-  "main": "symple.js",
+  "version": "0.9.6",
+  "description": "Realtime messaging and presence server",
+  "main": "./lib/symple.js",
   "dependencies": {
     "redis": "^2.4.2",
     "socket.io-redis": "^0.2.0",
@@ -14,7 +14,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "docs": "jsdoc2md symple.js  --template README.hbs > README.md"
+    "docs": "jsdoc2md ./lib/symple.js  --template README.hbs > README.md"
   },
   "repository": {
     "type": "git",
@@ -22,8 +22,12 @@
   },
   "keywords": [
     "symple",
-    "chat",
-    "streaming"
+    "realtime",
+    "streaming",
+    "webrtc",
+    "messaging",
+    "websocket",
+    "chat"
   ],
   "author": "Kam Low <auscaster@gmail.com> (http://sourcey.com)",
   "license": "MIT",
