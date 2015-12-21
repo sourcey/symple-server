@@ -1,6 +1,6 @@
 {
   "name": "symple",
-  "version": "0.9.7",
+  "version": "1.0.0",
   "description": "Realtime messaging and presence server",
   "main": "./lib/symple.js",
   "dependencies": {
@@ -22,6 +22,7 @@
   },
   "keywords": [
     "symple",
+    "server",
     "realtime",
     "messaging",
     "websocket",

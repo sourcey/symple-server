@@ -5,7 +5,7 @@ var Symple = require('./lib/symple');
 var sy = new Symple();
 
 // load a config file
-sy.loadConfig(__dirname + "/config.json");
+sy.loadConfig(__dirname + "/symple.json");
 
 // initialize the server
 sy.init();
@@ -14,6 +14,10 @@ sy.init();
 // sy.io.use(function(socket, next) { });
 
 // access HTTP/S server instance methods if required
-// sy.http.use(function(socket, next) { });
+// sy.http ...
+
+// access Redis publish/subscribe client instance methods
+// sy.pub ...
+// sy.sub ...
 
 console.log('Symple server listening on port ' + sy.config.port);

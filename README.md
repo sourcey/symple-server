@@ -13,12 +13,22 @@ Symple is a unrestrictive real time messaging and presence protocol that impleme
 
 ## Installation
 
+[Install Redis](http://redis.io/download) Note that Redis is optional, but required if you want to share secure sessions. If you're using Ubuntu just type:
+
+```
+sudo apt-get install redis-server
+```
+
+Install Symple from npm:
+
 ```bash
 npm install symple
 
-# add the --save flag to automatically add Symple to your package.json dependencies
+# use the --save flag to automatically add Symple to your package.json dependencies
 # npm install symple --save
 ```
+
+Done.
 
 ## Usage
 
@@ -27,12 +37,11 @@ To get started straight away fire up the default server by typing:
 ```bash
 node server
 
-# or
-
-npm start
+# or using npm
+# npm start
 ```
 
-The `server.js` file in the root directory of the repo provides a code example of how to include and extend the Symple server:
+The `server.js` file in the root directory of the repo provides an example of how to include the Symple server in your own code:
 
 ```bash
 // include Symple
@@ -42,7 +51,7 @@ var Symple = require('symple');
 var sy = new Symple();
 
 // load a config file
-sy.loadConfig(__dirname + "/config.json");
+sy.loadConfig(__dirname + "/symple.json");
 
 // initialize the server
 sy.init();
@@ -51,14 +60,18 @@ sy.init();
 // sy.io.use(function(socket, next) { });
 
 // access HTTP/S server instance methods if required
-// sy.http.use(function(socket, next) { });
+// sy.http ...
+
+// access Redis publish/subscribe client instance methods
+// sy.pub ...
+// sy.sub ...
 
 console.log('Symple server listening on port ' + sy.config.port);
 ```
 
 See the [configuration options](#configuration) below for a list of available options.
 
-Once the server is up and running you need a client to connect to it. There are a number of options in the following languages:
+Once the server is up and running you need a client to connect to it. There are a number of options here in the following languages:
 
 * JavaScript: https://github.com/sourcey/symple-client
 * Ruby: https://github.com/sourcey/symple-client-ruby
@@ -66,7 +79,7 @@ Once the server is up and running you need a client to connect to it. There are 
 
 ## Configuration
 
-To configure the server just modify `config.json` as needed:
+To configure the server just modify `symple.json` as needed:
 
 ```
 {
@@ -89,7 +102,7 @@ To configure the server just modify `config.json` as needed:
 
   /*
     Redis configuration
-    Redis must be available if using `config.authentication = true`
+    Redis must be available if using `authentication = true`
   */
   "redis" : {
     "host" : "localhost",
