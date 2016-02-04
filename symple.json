@@ -7,18 +7,20 @@
   "port" : 4500,  /* 443 */
 
   /*
-    Session time-to-live in minutes (default: 15 minutes)
+    Session time-to-live in minutes (Redis required, default: 15 minutes)
     This is the duration of time before sessions expire after the client disconnects.
     If set to `-1` the session will never expire.
   */
   "sessionTTL" : 15,
 
-  /* Enable or disable authentication */
+  /* Enable or disable authentication (Redis required) */
   "authentication" : true,
+
+  /* Enable users to dynamically join and leave rooms (Redis required) */
+  "dynamicRooms" : true,
 
   /*
     Redis configuration
-    Redis must be available if using `config.authentication = true`
   */
   "redis" : {
     "host" : "localhost",
