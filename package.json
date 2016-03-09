@@ -1,6 +1,6 @@
 {
   "name": "symple",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Realtime messaging and presence server",
   "main": "./lib/symple.js",
   "dependencies": {
