@@ -2,6 +2,8 @@
 
 The Symple Node.js server is a real time messaging server built on top of `socket.io` and `redis` for creating blazing fast messaging applications quickly and easily. Use cases include chat, sms, media streaming, and games that run in the web browser, desktop, or on mobile devices.
 
+## What is Symple?
+
 Symple is a unrestrictive real time messaging and presence protocol that implements the minimum number of features required to build full fledged messaging applications with security, flexibility, performance and scalability in mind. These features include:
 
 * Session sharing with any backend (via Redis)
