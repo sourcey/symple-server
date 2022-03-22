@@ -22,10 +22,7 @@
   /*
     Redis configuration
   */
-  "redis" : {
-    "host" : "localhost",
-    "port" : 6379
-  },
+  "redis" : "redis://localhost:6379",
 
   /* SSL configuration */
   "ssl" : {
