@@ -1,16 +1,12 @@
 {
   "name": "symple",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Realtime messaging and presence server",
   "main": "./lib/symple.js",
   "dependencies": {
-    "async": "3.2.3",
     "debug": "4.3.4",
-    "msgpack": "1.0.3",
     "redis": "4.0.4",
-    "uid2": "1.0.0",
-    "socket.io": "^4.4.1",
-    "socket.io-adapter": "^2.3.3"
+    "socket.io": "^4.4.1"
   },
   "devDependencies": {
     "jsdoc-to-markdown": "^7.1.1"
