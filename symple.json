@@ -35,9 +35,7 @@
     CORS configuration. See https://socket.io/docs/v4/handling-cors/
   */
   "cors" : {
-    "origin": "*",
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "preflightContinue": false,
-    "optionsSuccessStatus": 204
+    "origin": true,
+    "credentials": true
   }
 }
