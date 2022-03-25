@@ -14,7 +14,7 @@
   "sessionTTL" : 15,
 
   /* Enable or disable authentication (Redis required) */
-  "authentication" : false,
+  "authentication" : true,
 
   /* Enable users to dynamically join and leave rooms (Redis required) */
   "dynamicRooms" : true,
