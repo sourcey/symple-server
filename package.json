@@ -1,16 +1,16 @@
 {
   "name": "symple",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Realtime messaging and presence server",
   "main": "./lib/symple.js",
   "dependencies": {
-    "@socket.io/redis-adapter": "^7.1.0",
+    "@socket.io/redis-adapter": "^8.3.0",
     "debug": "4.3.4",
     "notepack.io": "~2.2.0",
-    "socket.io-adapter": "~2.3.0",
+    "socket.io-adapter": "~2.5.2",
     "uid2": "0.0.3",
-    "redis": "4.0.4",
-    "socket.io": "^4.4.1"
+    "redis": "4.6.13",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "jsdoc-to-markdown": "^7.1.1"
